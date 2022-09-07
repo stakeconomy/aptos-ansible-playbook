@@ -1,0 +1,18 @@
+---
+
+- name: Ensure build dependencies exists
+  apt:
+    name: ['make', 'git', 'unzip', 'gcc','psmisc']
+    state: present
+
+- import_tasks: install.yml
+  tags: aptos_install
+
+- import_tasks: service.yml
+  tags: aptos_service
+
+- import_tasks: system.yml
+
+- import_tasks: configure.yml
+  become_user: "{{ aptos_user }}"
+  tags: aptos_config

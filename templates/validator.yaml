@@ -1,0 +1,44 @@
+base:
+  role: "validator"
+  data_dir: "{{ aptos_user_home }}/data"
+  waypoint:
+    from_file: "{{ aptos_user_home }}/{{ aptos_workspace }}/waypoint.txt"
+
+consensus:
+  safety_rules:
+    service:
+      type: "local"
+    backend:
+      type: "rocks_db_storage"
+      path: secure_storage_db
+      namespace: ~
+    initial_safety_rules_config:
+      from_file:
+        waypoint:
+          from_file: "{{ aptos_user_home }}/{{ aptos_workspace }}/waypoint.txt"
+        identity_blob_path: "{{ aptos_user_home }}/{{ aptos_workspace }}/keys/validator-identity.yaml"
+  quorum_store_poll_count: 1
+
+execution:
+  genesis_file_location: "{{ aptos_user_home }}/{{ aptos_workspace }}/genesis.blob"
+  concurrency_level: 4
+
+validator_network:
+  discovery_method: "onchain"
+  mutual_authentication: true
+  identity:
+    type: "from_file"
+    path: "{{ aptos_user_home }}/{{ aptos_workspace }}/keys/validator-identity.yaml"
+
+full_node_networks:
+- network_id:
+    private: "vfn"
+  listen_address: "/ip4/0.0.0.0/tcp/6181"
+  identity:
+    type: "from_config"
+    key: "b0f405a3e75516763c43a2ae1d70423699f34cd68fa9f8c6bb2d67aa87d0af69"
+    peer_id: "00000000000000000000000000000000d58bc7bb154b38039bc9096ce04e1237"
+
+api:
+  enabled: true
+  address: "0.0.0.0:8080"

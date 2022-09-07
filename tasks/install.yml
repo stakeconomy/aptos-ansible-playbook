@@ -1,0 +1,63 @@
+---
+
+- name: create aptos user
+  user:
+    name: "{{ aptos_user }}"
+    password: '!'
+    shell: /bin/bash
+
+- name: Ensure aptos directory exists
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ aptos_user }}"
+    group: "{{ aptos_group }}"
+    mode: 0755
+  loop:
+    - "{{ aptos_user_home }}/bin"
+    - "{{ aptos_user_home }}/{{ aptos_workspace }}"
+    - "{{ aptos_user_home }}/{{ aptos_workspace }}/keys"
+    - "{{ aptos_user_home }}/{{ aptos_workspace }}/config"
+    - "{{ aptos_user_home }}/{{ aptos_workspace }}/data"
+    - "{{ aptos_user_home }}/{{ aptos_workspace }}/{{ inventory_hostname }}"
+
+- name: Clone Aptos
+  git:
+    repo: 'https://github.com/aptos-labs/aptos-core.git'
+    dest: ~/aptos-core
+
+- name: Git checkout to testnet branch
+  shell: "cd ~/aptos-core && git fetch && git checkout origin/testnet"
+  args:
+    executable: /bin/bash
+
+- name: Run dev-setup script
+  shell: "cd ~/aptos-core/ && ./scripts/dev_setup.sh -b -v"
+
+- name: Build aptos-node
+  shell: "source ~/.cargo/env && cd ~/aptos-core && cargo build --package aptos-node --release"
+  args:
+    executable: /bin/bash
+
+- name: Copy binary to aptos user home
+  copy:
+    src: "~/aptos-core/target/release/aptos-node"
+    dest: "{{ aptos_user_home }}/bin"
+    owner: "{{ aptos_user }}"
+    group: "{{ aptos_group }}"
+    mode: 0750
+    remote_src: yes
+
+- name: Download and unarchive Aptos release binary
+  unarchive:
+    src: "{{ aptos_download_url }}"
+    dest: "{{ aptos_user_home }}/bin"
+    mode: 0751
+    owner: "{{ aptos_user }}"
+    group: "{{ aptos_group }}"
+    remote_src: yes
+
+- name: Delete aptos-coredirectory
+  file:
+    state: absent
+    path: ~/aptos-core

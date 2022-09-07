@@ -1,0 +1,49 @@
+---
+
+
+- name: Check if keys are already generated
+  stat:
+    path: "~/{{ aptos_workspace }}/keys/private-keys.yaml"
+  register: aptos_keys
+
+- name: Check if genesis blob exists
+  stat:
+    path: ~/{{ aptos_workspace }}/genesis.blob
+  register: aptos_genesis
+
+- name: Generate testnet keys
+  shell: "{{ aptos_user_home }}/bin/aptos genesis generate-keys --output-dir {{ aptos_user_home }}/{{ aptos_workspace }}/keys"
+  args:
+    executable: /bin/bash
+  when: not aptos_keys.stat.exists
+
+- name: Configure validator information
+  shell: "~/bin/aptos genesis set-validator-configuration --local-repository-dir ~/{{ aptos_workspace }} --username {{ inventory_hostname }} --owner-public-identity-file ~/{{ aptos_workspace }}/keys/public-keys.yaml --validator-host {{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:6180 --full-node-host {{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:6182 --stake-amount 100000000000000"
+  args:
+    executable: /bin/bash
+
+- name: Copy layout file
+  template:
+    src: layout.yaml
+    dest: "~/{{ aptos_workspace }}/layout.yaml"
+
+- name: Copy AptosFramwork Move package # or get at wget https://github.com/aptos-labs/aptos-core/releases/download/aptos-framework-v0.3.0/framework.mrb
+  copy:
+    src: head.mrb
+    dest: "~/{{ aptos_workspace }}/framework.mrb"
+
+- name: Compile genesis blob and waypoint
+  shell: "cd ~ && {{ aptos_user_home }}/bin/aptos genesis generate-genesis --local-repository-dir {{ aptos_workspace }} --output-dir {{ aptos_workspace }}"
+  args:
+    executable: /bin/bash
+  when: not aptos_genesis.stat.exists
+
+- name: Copy validator.yaml file
+  template:
+    src: validator.yaml
+    dest: "~/{{ aptos_workspace }}/config/validator.yaml"
+
+- name: Copy fullnode.yaml filee
+  template:
+    src: fullnode.yaml
+    dest: "~/{{ aptos_workspace }}/config/fullnode.yaml"

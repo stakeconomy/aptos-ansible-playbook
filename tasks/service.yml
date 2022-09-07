@@ -1,0 +1,65 @@
+---
+
+- name: ensure systemd user dir is available
+  file:
+    path: "{{ aptos_service_dir }}"
+    owner: "{{ aptos_user }}"
+    group: "{{ aptos_group }}"
+    mode: 0750
+    state: directory
+
+- name: Create service file
+  template:
+    src: "{{ item }}.service"
+    dest: "{{ aptos_service_dir }}/{{ item }}.service"
+    owner: "{{ aptos_user }}"
+    group: "{{ aptos_group }}"
+    mode: 0644
+  loop:
+    - aptos-full-node
+    - aptos-validator-node
+
+- name: ensure xdg runtime dir is set in bashrc
+  lineinfile:
+    path: "/home/{{ aptos_user }}/.bashrc"
+    regexp: "^export XDG_RUNTIME_DIR"
+    line: "export XDG_RUNTIME_DIR=/run/user/$(id -u)"
+
+- name: ensure aptos user can use lingering systemd # It's necessary so that the service won't be shut down when there is no session for this user
+  command: loginctl enable-linger {{ aptos_user }}
+
+- name: ensure aptos user is part of systemd-journal group
+  user:
+    name: "{{ aptos_user }}"
+    groups: systemd-journal
+    append: yes
+
+- name: register uid of aptos user
+  shell: "id -u {{ aptos_user }}"
+  register: aptos_user_uid
+
+- name: setup service
+  systemd:
+    daemon_reload: true
+    name: "{{ item }}"
+    enabled: yes
+    scope: user
+  become: true
+  become_user: "{{ aptos_user }}"
+  loop:
+    - aptos-full-node
+    - aptos-validator-node
+
+- name: Start aptos service
+  become: yes
+  systemd:
+    state: restarted
+    enabled: yes
+    scope: user
+    daemon_reload: yes
+    name: "{{ item }}"
+  become: true
+  become_user: "{{ aptos_user }}"
+  loop:
+    - aptos-full-node
+    - aptos-validator-node

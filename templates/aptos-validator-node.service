@@ -1,0 +1,13 @@
+[Unit]
+Description=Aptos Validator
+After=network-online.target
+
+[Service]
+ExecStart={{ aptos_user_home }}/bin/aptos-node -f {{ aptos_user_home }}/{{ aptos_workspace }}/config/validator.yaml
+WorkingDirectory={{ aptos_user_home }}/bin
+Restart=always
+RestartSec=10
+LimitNOFILE=10000
+
+[Install]
+WantedBy=multi-user.target

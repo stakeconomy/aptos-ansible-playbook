@@ -1,0 +1,16 @@
+[Unit]
+Description=Aptos
+After=network-online.target
+
+[Service]
+User={{ aptos_user }}
+ExecStart={{ aptos_user_home }}/bin/aptos -f ./public_full_node.yaml
+WorkingDirectory={{ aptos_user_home }}/bin
+ExecStop=/usr/bin/killall -TERM aptos
+ExecReload=/usr/bin/killall -HUP aptos
+Restart=always
+RestartSec=10
+LimitNOFILE=10000
+
+[Install]
+WantedBy=multi-user.target
