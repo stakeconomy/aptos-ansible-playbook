@@ -1,0 +1,14 @@
+firewall_ports:
+  - port: 22
+#  - port: 80 # HTTP RPC
+#    proto: tcp
+#  - port: 443 # HTTPS RPC
+#    proto: tcp
+  - port: 6180 # Aptos Seed Port
+    proto: tcp
+  - port: 6182 # Aptos Full Node Port
+    proto: tcp
+  - port: 8080 # Aptos api
+    proto: tcp
+  - port: 9101 # Prometheus
+    proto: tcp

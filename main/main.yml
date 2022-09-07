@@ -1,0 +1,10 @@
+# Node
+aptos_user: aptos
+aptos_group: aptos
+aptos_user_home: "/home/{{ aptos_user }}"
+aptos_node_home: /aptos-core
+aptos_service_dir: "{{ aptos_user_home }}/.config/systemd/user"
+# Aptos
+aptos_download_url: "https://github.com/aptos-labs/aptos-core/releases/download/aptos-cli-v{{ aptos_version }}/aptos-cli-{{ aptos_version }}-Ubuntu-x86_64.zip"
+aptos_version: 0.3.2
+aptos_workspace: testnet
