@@ -10,7 +10,7 @@ consensus:
       type: "local"
     backend:
       type: "rocks_db_storage"
-      path: secure_storage_db
+      path: "{ aptos_user_home }}/data/secure_storage_db"
       namespace: ~
     initial_safety_rules_config:
       from_file:
