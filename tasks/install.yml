@@ -57,7 +57,7 @@
     group: "{{ aptos_group }}"
     remote_src: yes
 
-- name: Delete aptos-coredirectory
+- name: Delete aptos-core directory
   file:
     state: absent
     path: ~/aptos-core

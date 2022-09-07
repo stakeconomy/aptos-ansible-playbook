@@ -50,7 +50,7 @@
     - aptos-full-node
     - aptos-validator-node
 
-- name: Start aptos service
+- name: Start aptos-validator-node service
   become: yes
   systemd:
     state: restarted
@@ -61,5 +61,18 @@
   become: true
   become_user: "{{ aptos_user }}"
   loop:
-    - aptos-full-node
     - aptos-validator-node
+
+- name: Disable aptos-full-node service
+  become: yes
+  systemd:
+    state: disabled
+    enabled: yes
+    scope: user
+    daemon_reload: yes
+    name: "{{ item }}"
+  become: true
+  become_user: "{{ aptos_user }}"
+  loop:
+    - aptos-full-node
+
